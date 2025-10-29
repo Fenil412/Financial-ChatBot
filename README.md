@@ -1,4 +1,4 @@
-💰 **LLM Powered Financial Chatbot**
+## 💰 **LLM Powered Financial Chatbot**
 
 LLM Powered Financial Chatbot is a full-stack AI web application for financial document analysis and intelligent querying, powered by Google Gemini, LangChain, and local RAG pipelines.
 
