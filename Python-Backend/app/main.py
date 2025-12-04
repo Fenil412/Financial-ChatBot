@@ -85,11 +85,14 @@ async def shutdown_event():
 # For local development
 if __name__ == "__main__":
     import uvicorn
-    
+    import os
+
+    port = int(os.environ.get("PORT", settings.PORT))  # use Render's PORT if present
+
     uvicorn.run(
         "app.main:app",
-        host="0.0.0.0",
-        port=settings.PORT,
-        reload=True,  # Auto-reload on code changes
+        host="0.0.0.0",    #  required for Render
+        port=port,         #  will be Render's port in production
+        reload=True,       # good for local; ignored if you don't use this block on Render
         log_level="info"
     )
