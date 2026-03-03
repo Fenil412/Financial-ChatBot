@@ -14,6 +14,9 @@ class Settings(BaseSettings):
     # Groq API Key (FREE and FAST)
     GROQ_API_KEY: str
     
+    # OpenRouter API Key
+    OPENROUTER_API_KEY: str = ""
+    
     # Optional: Your site URL and app name (not needed for Groq)
     OPENROUTER_SITE_URL: str = "http://localhost:5173"
     OPENROUTER_APP_NAME: str = "FinChatBot"
@@ -45,7 +48,7 @@ class Settings(BaseSettings):
     class Config:
         env_file = ".env"
         case_sensitive = True
-        extra = "allow"
+        extra = "ignore"
 
 # Create global settings instance
 settings = Settings()

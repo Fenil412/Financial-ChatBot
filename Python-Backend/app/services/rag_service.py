@@ -28,33 +28,13 @@ class RAGService:
     """
     
     def __init__(self):
-        """Initialize RAG service with appropriate LLM provider"""
-        # Determine which provider to use
-        api_key = settings.GROQ_API_KEY
-        base_url = "https://api.groq.com/openai/v1"
-        model = settings.LLM_MODEL
-        
-        if not api_key and settings.OPENROUTER_API_KEY:
-            api_key = settings.OPENROUTER_API_KEY
-            base_url = "https://openrouter.ai/api/v1"
-            # Default models for OpenRouter if not specified
-            if model == "llama-3.1-8b-instant":
-                model = "meta-llama/llama-3.1-8b-instruct"
-        
-        if not api_key:
-            print("[WARNING] No AI API key found (GROQ_API_KEY or OPENROUTER_API_KEY)")
-            
+        """Initialize RAG service with LLM"""
         self.llm = ChatOpenAI(
-            model=model,
+            model=settings.LLM_MODEL,
             temperature=settings.LLM_TEMPERATURE,
-            max_tokens=2000,
-            openai_api_key=api_key,
-            openai_api_base=base_url,
-            # For OpenRouter headers
-            default_headers={
-                "HTTP-Referer": settings.OPENROUTER_SITE_URL,
-                "X-Title": settings.OPENROUTER_APP_NAME,
-            } if "openrouter.ai" in base_url else {}
+            max_tokens=2000,  # Limit response length to save credits
+            openai_api_key=settings.GROQ_API_KEY,
+            openai_api_base="https://api.groq.com/openai/v1",
         )
     
     def _format_documents(self, docs: List[Document]) -> str:
