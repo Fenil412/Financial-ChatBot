@@ -259,15 +259,19 @@ export const deleteConversation = asyncHandler(async (req, res) => {
 });
 
 /**
- * Update conversation title
+ * Update conversation title or feature mode
  * PATCH /api/v1/conversations/:conversationId
  */
 export const updateConversation = asyncHandler(async (req, res) => {
   const { conversationId } = req.params;
-  const { title } = req.body;
+  const { title, featureUsed } = req.body;
 
   // Validate input
-  if (!title || title.trim() === "") {
+  if (!title && !featureUsed) {
+    throw new ApiError(400, "Title or featureUsed must be provided");
+  }
+
+  if (title && title.trim() === "") {
     throw new ApiError(400, "Title cannot be empty");
   }
 
@@ -275,10 +279,15 @@ export const updateConversation = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Invalid conversation ID");
   }
 
+  // Build update object
+  const updateData = {};
+  if (title) updateData.title = title.trim();
+  if (featureUsed) updateData.featureUsed = featureUsed;
+
   // Update conversation
   const conversation = await Conversation.findByIdAndUpdate(
     conversationId,
-    { title: title.trim() },
+    updateData,
     { new: true }
   );
 

@@ -1,6 +1,6 @@
 /**
  * Global Styles
- * Tailwind CSS imports and custom styles
+ * Tailwind CSS imports and custom styles with mobile-first responsive design
  */
 
 @tailwind base;
@@ -10,7 +10,7 @@
 /* Custom scrollbar styles */
 @layer utilities {
   .scrollbar-thin::-webkit-scrollbar {
-    width: 8px;
+    width: 6px;
   }
 
   .scrollbar-thin::-webkit-scrollbar-track {
@@ -28,6 +28,13 @@
     background: rgba(148, 163, 184, 0.8);
     background-clip: padding-box;
   }
+
+  /* Hide scrollbar on mobile */
+  @media (max-width: 768px) {
+    .scrollbar-thin::-webkit-scrollbar {
+      width: 3px;
+    }
+  }
 }
 
 /* Base styles */
@@ -39,11 +46,23 @@
   body {
     @apply bg-gradient-to-br from-blue-50 via-blue-100 to-blue-200 text-gray-900 antialiased;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    /* Prevent horizontal scroll */
+    overflow-x: hidden;
+    /* Better text rendering on mobile */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   /* Smooth scrolling */
   html {
     scroll-behavior: smooth;
+    /* Prevent zoom on input focus (iOS) */
+    -webkit-text-size-adjust: 100%;
+  }
+
+  /* Prevent zoom on input focus (iOS) */
+  input, textarea, select {
+    font-size: 16px;
   }
 }
 
@@ -95,38 +114,90 @@
   @apply bg-white/90 backdrop-blur-xl border border-gray-200/50 shadow-lg;
 }
 
-/* Button styles */
+/* Button styles - Mobile first */
 .btn-primary {
-  @apply px-5 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-xl transition-all duration-200 font-semibold shadow-md hover:shadow-lg transform hover:-translate-y-0.5;
+  @apply px-4 py-2 sm:px-5 sm:py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-xl transition-all duration-200 font-semibold shadow-md hover:shadow-lg transform hover:-translate-y-0.5 text-sm sm:text-base;
 }
 
 .btn-secondary {
-  @apply px-5 py-2.5 bg-white hover:bg-gray-50 text-gray-700 rounded-xl transition-all duration-200 font-medium border border-gray-200 shadow-sm hover:shadow-md;
+  @apply px-4 py-2 sm:px-5 sm:py-2.5 bg-white hover:bg-gray-50 text-gray-700 rounded-xl transition-all duration-200 font-medium border border-gray-200 shadow-sm hover:shadow-md text-sm sm:text-base;
 }
 
 .btn-ghost {
-  @apply px-4 py-2 hover:bg-gray-100 text-gray-600 hover:text-gray-900 rounded-lg transition-all duration-200;
+  @apply px-3 py-1.5 sm:px-4 sm:py-2 hover:bg-gray-100 text-gray-600 hover:text-gray-900 rounded-lg transition-all duration-200 text-sm sm:text-base;
 }
 
-/* Input styles */
+/* Input styles - Mobile first */
 .input-field {
-  @apply w-full px-4 py-3 bg-white border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder-gray-400 transition-all duration-200;
+  @apply w-full px-3 py-2 sm:px-4 sm:py-3 bg-white border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder-gray-400 transition-all duration-200 text-base;
 }
 
 /* Card styles */
 .card {
-  @apply bg-white border border-gray-200 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-shadow duration-200;
+  @apply bg-white border border-gray-200 rounded-2xl p-4 sm:p-6 shadow-lg hover:shadow-xl transition-shadow duration-200;
 }
 
-/* Message bubble styles */
+/* Message bubble styles - Responsive */
 .message-user {
-  @apply bg-gradient-to-br from-blue-600 to-blue-700 text-white rounded-3xl rounded-tr-md shadow-md;
+  @apply bg-gradient-to-br from-blue-600 to-blue-700 text-white rounded-3xl rounded-tr-md shadow-md px-4 py-3 sm:px-6 sm:py-4 text-sm sm:text-base;
 }
 
 .message-assistant {
-  @apply bg-white text-gray-800 rounded-3xl rounded-tl-md shadow-md border border-gray-100;
+  @apply bg-white text-gray-800 rounded-3xl rounded-tl-md shadow-md border border-gray-100 px-4 py-3 sm:px-6 sm:py-4 text-sm sm:text-base;
 }
 
 .message-system {
-  @apply bg-gradient-to-r from-blue-50 to-blue-100 text-blue-800 rounded-2xl border border-blue-200/50 shadow-sm;
+  @apply bg-gradient-to-r from-blue-50 to-blue-100 text-blue-800 rounded-2xl border border-blue-200/50 shadow-sm px-4 py-2 sm:px-5 sm:py-3 text-xs sm:text-sm;
+}
+
+/* Mobile-specific utilities */
+@media (max-width: 640px) {
+  /* Reduce padding on mobile */
+  .mobile-compact {
+    @apply p-3;
+  }
+
+  /* Stack elements on mobile */
+  .mobile-stack {
+    @apply flex-col;
+  }
+
+  /* Full width on mobile */
+  .mobile-full {
+    @apply w-full;
+  }
+
+  /* Hide on mobile */
+  .mobile-hidden {
+    @apply hidden;
+  }
+}
+
+/* Tablet-specific utilities */
+@media (min-width: 641px) and (max-width: 1024px) {
+  .tablet-compact {
+    @apply p-4;
+  }
+}
+
+/* Touch-friendly tap targets */
+@media (hover: none) and (pointer: coarse) {
+  button, a, [role="button"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* Prevent text selection on buttons (better mobile UX) */
+button {
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+/* Safe area insets for notched devices */
+@supports (padding: max(0px)) {
+  body {
+    padding-left: max(0px, env(safe-area-inset-left));
+    padding-right: max(0px, env(safe-area-inset-right));
+  }
 }

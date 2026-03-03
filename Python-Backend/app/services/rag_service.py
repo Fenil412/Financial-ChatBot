@@ -5,7 +5,7 @@ Simplified version with clear logic flow
 """
 
 from typing import List, Dict
-from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_openai import ChatOpenAI
 from langchain_core.prompts import PromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.documents import Document
@@ -18,6 +18,7 @@ from app.config.prompts import (
     GENERAL_CONVERSATION_PROMPT
 )
 from app.services.vector_store import vector_store
+import traceback
 
 
 class RAGService:
@@ -27,12 +28,33 @@ class RAGService:
     """
     
     def __init__(self):
-        """Initialize RAG service with LLM"""
-        self.llm = ChatGoogleGenerativeAI(
-            model=settings.LLM_MODEL,
+        """Initialize RAG service with appropriate LLM provider"""
+        # Determine which provider to use
+        api_key = settings.GROQ_API_KEY
+        base_url = "https://api.groq.com/openai/v1"
+        model = settings.LLM_MODEL
+        
+        if not api_key and settings.OPENROUTER_API_KEY:
+            api_key = settings.OPENROUTER_API_KEY
+            base_url = "https://openrouter.ai/api/v1"
+            # Default models for OpenRouter if not specified
+            if model == "llama-3.1-8b-instant":
+                model = "meta-llama/llama-3.1-8b-instruct"
+        
+        if not api_key:
+            print("[WARNING] No AI API key found (GROQ_API_KEY or OPENROUTER_API_KEY)")
+            
+        self.llm = ChatOpenAI(
+            model=model,
             temperature=settings.LLM_TEMPERATURE,
-            google_api_key=settings.GOOGLE_API_KEY,
-            convert_system_message_to_human=True
+            max_tokens=2000,
+            openai_api_key=api_key,
+            openai_api_base=base_url,
+            # For OpenRouter headers
+            default_headers={
+                "HTTP-Referer": settings.OPENROUTER_SITE_URL,
+                "X-Title": settings.OPENROUTER_APP_NAME,
+            } if "openrouter.ai" in base_url else {}
         )
     
     def _format_documents(self, docs: List[Document]) -> str:
@@ -342,11 +364,18 @@ class RAGService:
             
         except Exception as e:
             print(f"\n[ERROR] Error generating answer: {e}")
+            # Print full traceback for debugging
+            traceback.print_exc()
+            try:
+                with open("error_traceback.log", "a", encoding="utf-8") as fh:
+                    fh.write(traceback.format_exc())
+                    fh.write("\n---\n")
+            except Exception:
+                pass
             return (
                 "I encountered an error while processing your question. "
                 "Please try again or rephrase your question."
             )
-
-
+            
 # Create global RAG service instance
 rag_service = RAGService()

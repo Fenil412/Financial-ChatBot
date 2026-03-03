@@ -1,7 +1,6 @@
 """
 Document Processing Service
 Handles PDF processing, text extraction, and image analysis
-Replaces S3 download with local file reading
 """
 
 import os
@@ -11,7 +10,7 @@ import pymupdf as fitz  # PyMuPDF for PDF processing
 from typing import List
 from langchain_core.documents import Document
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_openai import ChatOpenAI
 from langchain_core.messages import HumanMessage
 
 from app.config.settings import settings
@@ -32,10 +31,29 @@ class DocumentProcessor:
             chunk_overlap=settings.CHUNK_OVERLAP
         )
         
+        # Determine which provider to use for Vision
+        api_key = settings.GROQ_API_KEY
+        base_url = "https://api.groq.com/openai/v1"
+        model = settings.LLM_MODEL
+        
+        if not api_key and settings.OPENROUTER_API_KEY:
+            api_key = settings.OPENROUTER_API_KEY
+            base_url = "https://openrouter.ai/api/v1"
+            # Default vision models for OpenRouter
+            if model == "llama-3.1-8b-instant":
+                model = "meta-llama/llama-3.2-11b-vision-instruct"
+        
         # Vision-capable LLM for image analysis
-        self.vision_llm = ChatGoogleGenerativeAI(
-            model=settings.LLM_MODEL,
-            google_api_key=settings.GOOGLE_API_KEY
+        self.vision_llm = ChatOpenAI(
+            model=model,
+            max_tokens=1000,  # Vision models often need more tokens for detail
+            openai_api_key=api_key,
+            openai_api_base=base_url,
+            # For OpenRouter headers
+            default_headers={
+                "HTTP-Referer": settings.OPENROUTER_SITE_URL,
+                "X-Title": settings.OPENROUTER_APP_NAME,
+            } if "openrouter.ai" in base_url else {}
         )
     
     def _get_image_description(self, image_bytes: bytes) -> str:
