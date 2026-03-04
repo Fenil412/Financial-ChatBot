@@ -120,6 +120,7 @@ class QueryResponse(BaseModel):
     chart_data: Optional[ChartData] = Field(None, description="Optional chart data for visualization")
     citations: List[Citation] = Field(default=[], description="Source citations from documents")
     tool_calls: List[Dict[str, Any]] = Field(default=[], description="Tool calls made by agent")
+    suggestions: List[str] = Field(default=[], description="Suggested follow-up questions")
     
     class Config:
         json_schema_extra = {

@@ -23,6 +23,7 @@ const ChatPageNew = () => {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [documents, setDocuments] = useState([]);
+  const [featureMode, setFeatureMode] = useState('General');
 
   // Load conversations on mount
   useEffect(() => {
@@ -156,7 +157,7 @@ const ChatPageNew = () => {
         userText,
         chatHistory,
         vectorNamespaces,
-        'Analytical_Insights'
+        featureMode
       );
 
       // 3. Create AI message with enhanced data
@@ -167,7 +168,8 @@ const ChatPageNew = () => {
         timestamp: new Date().toISOString(),
         chart_data: aiResponse.chart_data,
         citations: aiResponse.citations,
-        tool_calls: aiResponse.tool_calls
+        tool_calls: aiResponse.tool_calls,
+        suggestions: aiResponse.suggestions || []
       };
 
       setMessages(prev => [...prev, aiMessage]);
@@ -292,6 +294,8 @@ const ChatPageNew = () => {
           handleArchiveConversation={handleArchiveConversation}
           handleRenameConversation={handleRenameConversation}
           handleMessageFeedback={handleMessageFeedback}
+          featureMode={featureMode}
+          setFeatureMode={setFeatureMode}
         />
       </ThemeProvider>
     </SettingsProvider>
@@ -314,7 +318,9 @@ const ChatPageContent = ({
   handleDeleteConversation,
   handleArchiveConversation,
   handleRenameConversation,
-  handleMessageFeedback
+  handleMessageFeedback,
+  featureMode,
+  setFeatureMode,
 }) => {
   const { customCursor } = useSettings();
 
@@ -355,6 +361,9 @@ const ChatPageContent = ({
               isLoading={isLoading}
               onFileUpload={handleFileUpload}
               onMessageFeedback={handleMessageFeedback}
+              conversationTitle={currentConversation?.title}
+              featureMode={featureMode}
+              onFeatureModeChange={setFeatureMode}
             />
           ) : (
             <div className="flex items-center justify-center h-full">

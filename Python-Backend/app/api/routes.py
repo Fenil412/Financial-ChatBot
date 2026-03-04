@@ -108,7 +108,8 @@ async def query_documents(request: QueryRequest):
             answer=result["answer"],
             chart_data=result.get("chart_data"),
             citations=result.get("citations", []),
-            tool_calls=result.get("tool_calls", [])
+            tool_calls=result.get("tool_calls", []),
+            suggestions=result.get("suggestions", [])
         )
         
     except HTTPException:
