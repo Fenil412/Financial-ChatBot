@@ -1,70 +1,168 @@
-# FinChatBot - Node.js Backend
+# FinChatBot — Node.js Backend
 
-The core REST API for the Financial ChatBot, handling user data, document management, and communication with the AI Service.
+REST API server for conversation management, document handling, and coordination between the frontend and Python AI service.
 
-## Tech Stack
+---
 
-- **Node.js** - Runtime environment
-- **Express** - Web framework
-- **MongoDB + Mongoose** - Database and ODM
-- **JWT** - Authentication
-- **Multer** - File upload handling
-- **Axios** - For communicating with the Python AI Service
+## Overview
 
-## Project Structure
+- **Framework**: Express.js
+- **Database**: MongoDB + Mongoose
+- **Real-time**: Socket.IO
+- **File Upload**: Multer
+- **Port**: `8000`
 
-```text
-Backend/
-├── src/
-│   ├── config/            # Database and environment configuration
-│   ├── controllers/       # Request handlers (logic)
-│   ├── middlewares/       # Express middlewares (Auth, Error handling)
-│   ├── models/            # Mongoose schemas
-│   ├── routes/            # API endpoint definitions
-│   ├── utils/             # Helper functions (Email, Cloudinary, etc.)
-│   ├── app.js             # Express app setup
-│   └── server.js          # Entry point (Server listener)
-├── uploads/               # Temporary local storage for uploaded documents
-└── package.json           # Dependencies and scripts
-```
+---
 
-## Getting Started
+## Setup
 
-### Prerequisites
-
-- Node.js 18 or higher
-- MongoDB (Local or Atlas)
-
-### Installation
-
-1. Navigate to the backend directory:
-   ```bash
-   cd Backend
-   ```
-
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-
-3. Create a `.env` file based on `.env.example`:
-   ```bash
-   cp .env.example .env
-   ```
-   *Fill in your MongoDB URI and other required secrets.*
-
-### Running the Server
-
-Start the server in development mode:
 ```bash
+cd Backend
+npm install
+cp .env.example .env   # Fill in your values
 npm run dev
 ```
 
-The API will be available at [http://localhost:8000](http://localhost:8000).
+---
 
-## API Features
+## Environment Variables
 
-- **User Management**: Sign up, login, and profile management.
-- **Document Services**: Secure file upload and tracking.
-- **AI Integration**: Acts as a bridge between the frontend and the Python-based RAG service.
-- **Webhook Support**: Handles callbacks from external services.
+```env
+PORT=8000
+MONGODB_URI=mongodb+srv://...
+PYTHON_SERVICE_URL=http://localhost:8001
+FRONTEND_URL=http://localhost:5173
+```
+
+---
+
+## API Endpoints
+
+### Conversations — `/api/conversations`
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/` | Get all conversations |
+| `POST` | `/` | Create new conversation |
+| `GET` | `/:id` | Get conversation with all messages |
+| `PATCH` | `/:id` | Update conversation title |
+| `DELETE` | `/:id` | Delete conversation (also triggers document cleanup) |
+| `POST` | `/:id/messages` | Save a user or assistant message |
+
+**Create Conversation — Request:**
+```json
+{ "title": "Q4 Revenue Analysis" }
+```
+
+**Save Message — Request:**
+```json
+{
+  "role": "assistant",
+  "content": "Here is your bar chart...",
+  "chart_data": { "type": "bar", "title": "Revenue", "labels": [], "datasets": [] },
+  "citations": [],
+  "suggestions": ["Show pie chart", "Compare with Q3", "What is the margin?"]
+}
+```
+
+---
+
+### Documents — `/api/documents`
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `POST` | `/upload` | Upload up to 10 PDFs (`multipart/form-data`) |
+| `GET` | `/conversation/:id` | Get all documents for a conversation |
+| `DELETE` | `/:documentId` | Delete document (file + vectors) |
+| `PATCH` | `/:documentId/status` | Webhook: Python updates document status |
+
+**Upload Request:**
+```
+Content-Type: multipart/form-data
+Fields: documents[] (files), conversationId (string)
+```
+
+**Status Update (Webhook from Python):**
+```json
+{
+  "status": "processed",
+  "pageCount": 4,
+  "chunkCount": 32
+}
+```
+
+---
+
+## Project Structure
+
+```
+Backend/
+├── src/
+│   ├── app.js                    # Express setup + middleware
+│   ├── server.js                 # Server entry + Socket.IO
+│   ├── config/
+│   │   └── db.js                 # MongoDB connection
+│   ├── controllers/
+│   │   ├── conversation.controller.js
+│   │   ├── document.controller.js
+│   │   └── analytics.controller.js
+│   ├── models/
+│   │   ├── Conversation.model.js
+│   │   ├── Message.model.js
+│   │   └── Document.model.js
+│   ├── routes/
+│   │   ├── conversation.routes.js
+│   │   └── document.routes.js
+│   ├── middlewares/
+│   │   ├── upload.middleware.js   # Multer config
+│   │   └── error.middleware.js
+│   └── utils/
+│       └── helpers.js
+├── uploads/                      # Uploaded files (gitignored)
+└── package.json
+```
+
+---
+
+## MongoDB Models
+
+### Conversation
+```js
+{ title: String, status: String, createdAt: Date }
+```
+
+### Message
+```js
+{
+  conversationId: ObjectId,
+  role: 'user' | 'assistant' | 'system',
+  content: String,
+  chart_data: Object,
+  citations: Array,
+  suggestions: Array,
+  timestamp: Date
+}
+```
+
+### Document
+```js
+{
+  conversationId: ObjectId,
+  fileName: String,
+  filePath: String,
+  vectorNamespace: String,
+  status: 'pending' | 'processing' | 'processed' | 'failed',
+  pageCount: Number,
+  chunkCount: Number
+}
+```
+
+---
+
+## Socket.IO Events
+
+| Event | Direction | Payload |
+|-------|-----------|---------|
+| `document:processing` | Server → Client | `{ documentId }` |
+| `document:completed` | Server → Client | `{ documentId, status }` |
+| `document:error` | Server → Client | `{ documentId, error }` |
