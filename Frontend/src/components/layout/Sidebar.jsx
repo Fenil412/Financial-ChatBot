@@ -27,8 +27,7 @@ const Sidebar = ({
       {/* Sidebar - Mobile drawer, desktop fixed */}
       <div
         className={`
-          fixed md:relative z-30 h-full w-72 sm:w-80 bg-white/95 backdrop-blur-xl border-r border-gray-200/50
-          transform transition-all duration-300 ease-in-out shadow-2xl md:shadow-none
+          fixed md:relative z-30 h-full w-72 sm:w-80 bg-white/95 backdrop-blur-xl border-r border-gray-200/50 shadow-2xl md:shadow-none
           ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
         `}
       >
@@ -55,7 +54,7 @@ const Sidebar = ({
             {/* New Chat Button */}
             <button
               onClick={onNewChat}
-              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 sm:px-5 sm:py-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-lg sm:rounded-xl transition-all duration-200 shadow-md hover:shadow-lg font-semibold transform hover:-translate-y-0.5 text-sm sm:text-base"
+              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 sm:px-5 sm:py-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-lg sm:rounded-xl shadow-md font-semibold text-sm sm:text-base"
             >
               <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
               <span>New Conversation</span>
@@ -71,7 +70,7 @@ const Sidebar = ({
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search conversations..."
-                className="w-full pl-9 pr-3 py-2 text-sm bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all placeholder-gray-400"
+                className="w-full pl-9 pr-3 py-2 text-sm bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-gray-400"
               />
               {searchQuery && (
                 <button
@@ -110,22 +109,18 @@ const Sidebar = ({
                     key={conv._id}
                     className={`
                       group flex items-center gap-2 sm:gap-3 p-3 sm:p-4 rounded-lg sm:rounded-xl cursor-pointer
-                      transition-all duration-200
-                      ${
-                        currentConversationId === conv._id
-                          ? 'bg-gradient-to-r from-blue-50 to-blue-100 text-blue-900 border-2 border-blue-200 shadow-md'
-                          : 'hover:bg-gray-50 text-gray-700 border-2 border-transparent hover:border-gray-200'
+                      ${currentConversationId === conv._id
+                        ? 'bg-gradient-to-r from-blue-50 to-blue-100 text-blue-900 border-2 border-blue-200 shadow-md'
+                        : 'hover:bg-gray-50 text-gray-700 border-2 border-transparent hover:border-gray-200'
                       }
                     `}
                   >
-                    <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                      currentConversationId === conv._id 
-                        ? 'bg-gradient-to-br from-blue-600 to-blue-700' 
-                        : 'bg-gray-100 group-hover:bg-gray-200'
-                    }`}>
-                      <MessageSquare className={`w-4 h-4 sm:w-5 sm:h-5 ${
-                        currentConversationId === conv._id ? 'text-white' : 'text-gray-600'
-                      }`} />
+                    <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${currentConversationId === conv._id
+                      ? 'bg-gradient-to-br from-blue-600 to-blue-700'
+                      : 'bg-gray-100 group-hover:bg-gray-200'
+                      }`}>
+                      <MessageSquare className={`w-4 h-4 sm:w-5 sm:h-5 ${currentConversationId === conv._id ? 'text-white' : 'text-gray-600'
+                        }`} />
                     </div>
                     <div
                       onClick={() => onSelectChat(conv._id)}
@@ -133,8 +128,8 @@ const Sidebar = ({
                     >
                       <p className="text-sm font-semibold truncate">{conv.title}</p>
                       <p className="text-xs text-gray-500 mt-0.5 truncate">
-                        {new Date(conv.updatedAt).toLocaleDateString('en-US', { 
-                          month: 'short', 
+                        {new Date(conv.updatedAt).toLocaleDateString('en-US', {
+                          month: 'short',
                           day: 'numeric',
                           hour: '2-digit',
                           minute: '2-digit'
@@ -146,7 +141,7 @@ const Sidebar = ({
                         e.stopPropagation();
                         onDeleteChat(conv._id);
                       }}
-                      className="opacity-0 group-hover:opacity-100 p-1.5 sm:p-2 hover:bg-red-50 rounded-lg transition-all duration-200 flex-shrink-0"
+                      className="opacity-0 group-hover:opacity-100 p-1.5 sm:p-2 hover:bg-red-50 rounded-lg flex-shrink-0"
                       title="Delete conversation"
                     >
                       <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-red-500" />

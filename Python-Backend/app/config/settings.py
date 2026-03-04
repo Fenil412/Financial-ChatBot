@@ -12,7 +12,10 @@ class Settings(BaseSettings):
     """
     
     # Groq API Key (FREE and FAST)
-    GROQ_API_KEY: str
+    GROQ_API_KEY: str = ""
+    
+    # OpenAI API Key
+    OPENAI_API_KEY: str = ""
     
     # OpenRouter API Key
     OPENROUTER_API_KEY: str = ""
@@ -33,10 +36,19 @@ class Settings(BaseSettings):
     # Embedding Model Configuration
     EMBEDDING_MODEL: str = "sentence-transformers/all-MiniLM-L6-v2"
     
-    # LLM Configuration (Groq)
-    LLM_MODEL: str = "llama-3.1-8b-instant"  # FREE Groq model
+    # LLM Configuration
+    LLM_PROVIDER: str = "groq"  # 'openai' or 'groq' - Groq is free and fast
+    LLM_MODEL: str = "llama-3.3-70b-versatile"  # Groq's best free model
     LLM_TEMPERATURE: float = 0.0
-    LLM_MAX_TOKENS: int = 2000  # Limit to save credits
+    LLM_MAX_TOKENS: int = 2000
+
+    # Vision Configuration (for PDF image analysis)
+    # Options: 'openrouter' (free), 'openai' (paid), 'none' (skip images)
+    VISION_PROVIDER: str = "openrouter"
+    VISION_MODEL: str = "qwen/qwen2.5-vl-72b-instruct:free"  # Free vision model on OpenRouter
+    
+    # Context Management
+    MAX_CONTEXT_CHARACTERS: int = 15000  # Approx 4000 tokens
     
     # Document Processing Configuration
     CHUNK_SIZE: int = 1000

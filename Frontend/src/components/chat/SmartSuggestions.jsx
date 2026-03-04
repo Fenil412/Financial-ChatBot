@@ -6,7 +6,7 @@
 import { Lightbulb, ArrowRight } from 'lucide-react';
 
 const SmartSuggestions = ({ lastMessage, documents, onSuggestionClick, disabled }) => {
-  
+
   const generateSuggestions = () => {
     const suggestions = [];
 
@@ -22,7 +22,7 @@ const SmartSuggestions = ({ lastMessage, documents, onSuggestionClick, disabled 
     // Based on last message content
     if (lastMessage) {
       const content = lastMessage.content.toLowerCase();
-      
+
       // Revenue related
       if (content.includes('revenue') || content.includes('sales')) {
         suggestions.push(
@@ -91,12 +91,12 @@ const SmartSuggestions = ({ lastMessage, documents, onSuggestionClick, disabled 
             key={index}
             onClick={() => onSuggestionClick(suggestion)}
             disabled={disabled}
-            className="w-full flex items-center justify-between px-3 py-2 sm:px-4 sm:py-2.5 bg-white hover:bg-blue-50 text-left rounded-lg border border-blue-200 hover:border-blue-400 transition-all duration-200 group disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full flex items-center justify-between px-3 py-2 sm:px-4 sm:py-2.5 bg-white hover:bg-blue-50 text-left rounded-lg border border-blue-200 hover:border-blue-400 group disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             <span className="text-xs sm:text-sm text-gray-700 group-hover:text-blue-700 flex-1 pr-2">
               {suggestion}
             </span>
-            <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-400 group-hover:text-blue-600 transition-colors flex-shrink-0" />
+            <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-400 group-hover:text-blue-600 flex-shrink-0" />
           </button>
         ))}
       </div>

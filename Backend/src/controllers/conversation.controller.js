@@ -90,12 +90,13 @@ export const createConversation = asyncHandler(async (req, res) => {
 });
 
 /**
- * Send a chat message and get AI response
+ * Save a chat message (user or assistant)
  * POST /api/v1/conversations/:conversationId/messages
+ * Body: { content, role? }  — role defaults to 'user'
  */
 export const sendChatMessage = asyncHandler(async (req, res) => {
   const { conversationId } = req.params;
-  const { content } = req.body;
+  const { content, role = 'user' } = req.body;
 
   // Validate input
   if (!content || content.trim() === "") {
@@ -107,77 +108,22 @@ export const sendChatMessage = asyncHandler(async (req, res) => {
   }
 
   // Find conversation
-  const conversation = await Conversation.findById(conversationId)
-    .populate("documents");
-
+  const conversation = await Conversation.findById(conversationId);
   if (!conversation) {
     throw new ApiError(404, "Conversation not found");
   }
 
-  // Save user's message
-  const userMessage = await Message.create({
+  // Save message to database
+  const message = await Message.create({
     conversation: conversationId,
-    role: "user",
+    role: role,
     content: content,
-  });
-
-  // Get recent chat history (last 20 messages)
-  const chatHistory = await Message.find({ conversation: conversationId })
-    .sort({ createdAt: "asc" })
-    .select("role content -_id")
-    .limit(20);
-
-  // Get vector namespaces from processed documents
-  const vectorNamespaces = conversation.documents
-    .filter((doc) => doc.status === "processed")
-    .map((doc) => doc.vectorNamespace);
-
-  // Call Python AI service for response
-  let aiContent;
-  try {
-    const response = await axios.post(
-      `${process.env.PYTHON_SERVICE_URL}/query`,
-      {
-        question: content,
-        chatHistory: chatHistory,
-        vectorNamespaces: vectorNamespaces,
-        featureUsed: conversation.featureUsed,
-      },
-      {
-        timeout: 30000, // 30 second timeout
-      }
-    );
-    aiContent = response.data.answer;
-  } catch (error) {
-    console.error("Error calling Python AI service:", error.message);
-    throw new ApiError(
-      502,
-      "AI service is currently unavailable. Please try again later."
-    );
-  }
-
-  if (!aiContent || aiContent.trim() === "") {
-    throw new ApiError(500, "Received empty response from AI service");
-  }
-
-  // Save AI's response
-  const assistantMessage = await Message.create({
-    conversation: conversationId,
-    role: "assistant",
-    content: aiContent,
   });
 
   return res
     .status(201)
     .json(
-      new ApiResponse(
-        201,
-        {
-          userMessage,
-          assistantMessage,
-        },
-        "Message sent and response received successfully"
-      )
+      new ApiResponse(201, { message }, "Message saved successfully")
     );
 });
 
@@ -264,11 +210,11 @@ export const deleteConversation = asyncHandler(async (req, res) => {
  */
 export const updateConversation = asyncHandler(async (req, res) => {
   const { conversationId } = req.params;
-  const { title, featureUsed } = req.body;
+  const { title, featureUsed, isArchived } = req.body;
 
   // Validate input
-  if (!title && !featureUsed) {
-    throw new ApiError(400, "Title or featureUsed must be provided");
+  if (title === undefined && featureUsed === undefined && isArchived === undefined) {
+    throw new ApiError(400, "Title, featureUsed, or isArchived must be provided");
   }
 
   if (title && title.trim() === "") {
@@ -283,6 +229,7 @@ export const updateConversation = asyncHandler(async (req, res) => {
   const updateData = {};
   if (title) updateData.title = title.trim();
   if (featureUsed) updateData.featureUsed = featureUsed;
+  if (isArchived !== undefined) updateData.isArchived = isArchived;
 
   // Update conversation
   const conversation = await Conversation.findByIdAndUpdate(

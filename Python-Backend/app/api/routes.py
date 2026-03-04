@@ -14,6 +14,7 @@ from app.models.schemas import (
 )
 from app.services.document_processor import document_processor
 from app.services.rag_service import rag_service
+from app.services.enhanced_rag_service import enhanced_rag_service
 from app.services.vector_store import vector_store
 import os
 
@@ -73,14 +74,15 @@ async def process_document(
 @router.post("/query", response_model=QueryResponse)
 async def query_documents(request: QueryRequest):
     """
-    Query endpoint
-    Receives a question and returns an AI-generated answer
+    Enhanced Query endpoint with agentic tools and chart generation
     
     Process:
     1. Retrieve relevant document chunks from vector store
-    2. Format context and chat history
-    3. Generate answer using LLM
-    4. Return answer to user
+    2. Detect if calculation tools are needed
+    3. Use agent with tools if needed, otherwise standard RAG
+    4. Generate chart data if time-series/comparative data detected
+    5. Extract source citations
+    6. Return structured response
     """
     try:
         print(f"\n[REQUEST] Received query request")
@@ -93,15 +95,21 @@ async def query_documents(request: QueryRequest):
                 detail="Question cannot be empty"
             )
         
-        # Get answer from RAG service
-        answer = await rag_service.get_answer(
+        # Use enhanced RAG service
+        result = await enhanced_rag_service.query_with_agent(
             question=request.question,
             chat_history=request.chatHistory,
             namespaces=request.vectorNamespaces,
-            feature_mode=request.featureUsed
+            enable_tools=True,  # Enable agentic tools
+            enable_charts=True  # Enable chart generation
         )
         
-        return QueryResponse(answer=answer)
+        return QueryResponse(
+            answer=result["answer"],
+            chart_data=result.get("chart_data"),
+            citations=result.get("citations", []),
+            tool_calls=result.get("tool_calls", [])
+        )
         
     except HTTPException:
         raise
@@ -111,7 +119,7 @@ async def query_documents(request: QueryRequest):
         traceback.print_exc()
         raise HTTPException(
             status_code=500,
-            detail=f"Error: {str(e)}"  # Show actual error for debugging
+            detail=f"Error: {str(e)}"
         )
 
 
@@ -205,5 +213,34 @@ async def delete_multiple_documents(documents: list):
         raise HTTPException(
             status_code=500,
             detail=f"Failed to delete documents: {str(e)}"
+        )
+
+
+@router.post("/test-tools")
+async def test_financial_tools():
+    """
+    Test endpoint for financial calculation tools
+    Demonstrates tool capabilities
+    """
+    from app.agent.calculator import FinancialCalculator
+    
+    try:
+        results = {
+            "expression_test": FinancialCalculator.calculate("(150 - 120) / 120 * 100"),
+            "growth_test": FinancialCalculator.calculate_growth(120, 150),
+            "ratio_test": FinancialCalculator.calculate_ratio(300, 1000, "ROE"),
+            "cagr_test": FinancialCalculator.calculate_cagr(100, 150, 3),
+            "margin_test": FinancialCalculator.calculate_margin(300, 1000, "Net Margin")
+        }
+        
+        return {
+            "message": "Financial tools test completed",
+            "results": results
+        }
+        
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Tool test failed: {str(e)}"
         )
 

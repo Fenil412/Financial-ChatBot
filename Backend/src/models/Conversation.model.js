@@ -28,6 +28,11 @@ const conversationSchema = new mongoose.Schema(
       enum: Object.values(FEATURE_MODES),
       default: FEATURE_MODES.SMART,
     },
+    // Whether the conversation is archived
+    isArchived: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true } // Automatically add createdAt and updatedAt
 );

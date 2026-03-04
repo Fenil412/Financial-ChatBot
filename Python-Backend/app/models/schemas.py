@@ -4,7 +4,7 @@ Defines the structure of API requests and responses
 """
 
 from pydantic import BaseModel, Field
-from typing import List, Dict
+from typing import List, Dict, Optional, Any
 
 class ProcessDocumentRequest(BaseModel):
     """
@@ -76,17 +76,67 @@ class DeleteDocumentRequest(BaseModel):
             }
         }
 
-class QueryResponse(BaseModel):
+class ChartData(BaseModel):
     """
-    Response model for query endpoint
-    Returns the AI's answer
+    Chart data model for visualization
     """
-    answer: str = Field(..., description="AI-generated answer to the question")
+    type: str = Field(..., description="Chart type: line, bar, pie, area")
+    title: str = Field(..., description="Chart title")
+    labels: List[str] = Field(..., description="X-axis labels (e.g., years, quarters)")
+    datasets: List[Dict[str, Any]] = Field(..., description="Chart datasets with labels and values")
     
     class Config:
         json_schema_extra = {
             "example": {
-                "answer": "The revenue in Q4 was $2.5 million, representing a 15% increase from Q3."
+                "type": "line",
+                "title": "Revenue Growth Over Time",
+                "labels": ["2021", "2022", "2023"],
+                "datasets": [
+                    {
+                        "label": "Revenue",
+                        "data": [100, 150, 210],
+                        "color": "#3b82f6"
+                    }
+                ]
+            }
+        }
+
+
+class Citation(BaseModel):
+    """
+    Source citation model
+    """
+    page: int = Field(..., description="Page number in document")
+    snippet: str = Field(..., description="Relevant text snippet")
+    confidence: float = Field(default=1.0, description="Relevance confidence score")
+
+
+class QueryResponse(BaseModel):
+    """
+    Response model for query endpoint
+    Returns the AI's answer with optional chart data and citations
+    """
+    answer: str = Field(..., description="AI-generated answer to the question")
+    chart_data: Optional[ChartData] = Field(None, description="Optional chart data for visualization")
+    citations: List[Citation] = Field(default=[], description="Source citations from documents")
+    tool_calls: List[Dict[str, Any]] = Field(default=[], description="Tool calls made by agent")
+    
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "answer": "Revenue grew 25% YoY from $120M to $150M.",
+                "chart_data": {
+                    "type": "line",
+                    "title": "Revenue Growth",
+                    "labels": ["2022", "2023"],
+                    "datasets": [{"label": "Revenue", "data": [120, 150], "color": "#3b82f6"}]
+                },
+                "citations": [
+                    {"page": 12, "snippet": "Revenue: $150M", "confidence": 0.95}
+                ],
+                "tool_calls": [
+                    {"tool": "calculate_growth_rate", "result": {"result": 25.0}}
+                ]
             }
         }
 

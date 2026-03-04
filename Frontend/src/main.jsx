@@ -9,14 +9,18 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import './index.css'
 
 // Import pages
-import ChatPage from './pages/ChatPage'
+import ChatPageNew from './pages/ChatPageNew'
+import AboutPage from './pages/AboutPage'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <BrowserRouter>
       <Routes>
         {/* Main chat route */}
-        <Route path="/" element={<ChatPage />} />
+        <Route path="/" element={<ChatPageNew />} />
+        
+        {/* About page route */}
+        <Route path="/about" element={<AboutPage />} />
         
         {/* Catch all - redirect to home */}
         <Route path="*" element={<Navigate to="/" replace />} />

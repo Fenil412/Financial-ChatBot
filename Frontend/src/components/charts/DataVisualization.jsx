@@ -100,21 +100,21 @@ const DataVisualization = ({ content }) => {
       {
         label: 'Value',
         data: data.values,
-        backgroundColor: chartType === 'pie' 
+        backgroundColor: chartType === 'pie'
           ? [
-              'rgba(59, 130, 246, 0.8)',
-              'rgba(16, 185, 129, 0.8)',
-              'rgba(249, 115, 22, 0.8)',
-              'rgba(139, 92, 246, 0.8)',
-            ]
+            'rgba(59, 130, 246, 0.8)',
+            'rgba(16, 185, 129, 0.8)',
+            'rgba(249, 115, 22, 0.8)',
+            'rgba(139, 92, 246, 0.8)',
+          ]
           : 'rgba(59, 130, 246, 0.8)',
         borderColor: chartType === 'pie'
           ? [
-              'rgba(59, 130, 246, 1)',
-              'rgba(16, 185, 129, 1)',
-              'rgba(249, 115, 22, 1)',
-              'rgba(139, 92, 246, 1)',
-            ]
+            'rgba(59, 130, 246, 1)',
+            'rgba(16, 185, 129, 1)',
+            'rgba(249, 115, 22, 1)',
+            'rgba(139, 92, 246, 1)',
+          ]
           : 'rgba(59, 130, 246, 1)',
         borderWidth: 2,
         tension: 0.4,
@@ -126,6 +126,7 @@ const DataVisualization = ({ content }) => {
     responsive: true,
     maintainAspectRatio: true,
     aspectRatio: window.innerWidth < 640 ? 1.5 : 2,
+    animation: false,
     plugins: {
       legend: {
         display: chartType === 'pie',
@@ -140,6 +141,10 @@ const DataVisualization = ({ content }) => {
       title: {
         display: false,
       },
+      tooltip: {
+        enabled: true,
+        animation: false // Disable tooltip animation as well
+      }
     },
     scales: chartType !== 'pie' ? {
       y: {

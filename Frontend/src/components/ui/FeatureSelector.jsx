@@ -56,14 +56,14 @@ const FeatureSelector = ({ selectedFeature, onFeatureChange, disabled }) => {
       {features.map((feature) => {
         const Icon = feature.icon;
         const isSelected = selectedFeature === feature.id;
-        
+
         return (
           <button
             key={feature.id}
             onClick={() => onFeatureChange(feature.id)}
             disabled={disabled}
             className={`
-              flex items-center gap-1.5 sm:gap-2 px-2 py-1.5 sm:px-3 sm:py-2 rounded-lg border-2 transition-all duration-200
+              flex items-center gap-1.5 sm:gap-2 px-2 py-1.5 sm:px-3 sm:py-2 rounded-lg border-2 transition-colors
               ${getColorClasses(feature.color, isSelected)}
               ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
               ${!isSelected && !disabled ? 'border-gray-200' : ''}
@@ -77,9 +77,9 @@ const FeatureSelector = ({ selectedFeature, onFeatureChange, disabled }) => {
             </span>
             {/* Show abbreviated name on mobile */}
             <span className="text-xs font-medium sm:hidden">
-              {feature.id === 'Smart_Chat' ? 'Chat' : 
-               feature.id === 'Document_Analysis' ? 'Docs' :
-               feature.id === 'Analytical_Insights' ? 'Insights' : 'General'}
+              {feature.id === 'Smart_Chat' ? 'Chat' :
+                feature.id === 'Document_Analysis' ? 'Docs' :
+                  feature.id === 'Analytical_Insights' ? 'Insights' : 'General'}
             </span>
           </button>
         );

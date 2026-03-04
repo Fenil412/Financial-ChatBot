@@ -113,9 +113,9 @@ export const VoiceButton = ({ onTranscript, disabled }) => {
       onClick={toggleListening}
       disabled={disabled}
       className={`
-        p-1.5 sm:p-2 rounded-lg transition-all duration-200
-        ${isListening 
-          ? 'bg-red-500 hover:bg-red-600 text-white animate-pulse' 
+        p-1.5 sm:p-2 rounded-lg transition-colors
+        ${isListening
+          ? 'bg-red-500 hover:bg-red-600 text-white'
           : 'hover:bg-gray-100 text-gray-600'
         }
         ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
@@ -129,7 +129,7 @@ export const VoiceButton = ({ onTranscript, disabled }) => {
 
 // Speaker Button Component
 export const SpeakerButton = ({ text, disabled }) => {
-  const { isSpeaking, speak } = VoiceInput({ onTranscript: () => {}, disabled });
+  const { isSpeaking, speak } = VoiceInput({ onTranscript: () => { }, disabled });
 
   if (!text) return null;
 
@@ -138,9 +138,9 @@ export const SpeakerButton = ({ text, disabled }) => {
       onClick={() => speak(text)}
       disabled={disabled}
       className={`
-        p-1.5 sm:p-2 rounded-lg transition-all duration-200
-        ${isSpeaking 
-          ? 'bg-blue-100 text-blue-600' 
+        p-1.5 sm:p-2 rounded-lg transition-colors
+        ${isSpeaking
+          ? 'bg-blue-100 text-blue-600'
           : 'hover:bg-gray-100 text-gray-600'
         }
         ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}

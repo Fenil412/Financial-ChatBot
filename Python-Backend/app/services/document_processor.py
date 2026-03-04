@@ -31,29 +31,50 @@ class DocumentProcessor:
             chunk_overlap=settings.CHUNK_OVERLAP
         )
         
-        # Vision-capable LLM for image analysis
-        self.vision_llm = ChatOpenAI(
-            model=settings.LLM_MODEL,
-            max_tokens=500,  # Limit image descriptions to save credits
-            openai_api_key=settings.GROQ_API_KEY,
-            openai_api_base="https://api.groq.com/openai/v1",
-        )
+        # Vision LLM for image analysis — controlled by VISION_PROVIDER in .env
+        self.vision_enabled = False
+        provider = settings.VISION_PROVIDER.lower()
+
+        if provider == "openrouter" and settings.OPENROUTER_API_KEY:
+            try:
+                self.vision_llm = ChatOpenAI(
+                    model=settings.VISION_MODEL,
+                    max_tokens=500,
+                    openai_api_key=settings.OPENROUTER_API_KEY,
+                    openai_api_base="https://openrouter.ai/api/v1",
+                )
+                self.vision_enabled = True
+                print(f"[VISION] OpenRouter vision enabled: {settings.VISION_MODEL}")
+            except Exception as e:
+                print(f"[VISION] OpenRouter vision init failed: {e}")
+
+        elif provider == "openai" and settings.OPENAI_API_KEY:
+            try:
+                self.vision_llm = ChatOpenAI(
+                    model="gpt-4o-mini",
+                    max_tokens=500,
+                    openai_api_key=settings.OPENAI_API_KEY,
+                )
+                self.vision_enabled = True
+                print("[VISION] OpenAI vision model enabled")
+            except Exception as e:
+                print(f"[VISION] OpenAI vision init failed: {e}")
+
+        else:
+            print("[VISION] Vision disabled (VISION_PROVIDER=none or no key) — images will be skipped")
     
     def _get_image_description(self, image_bytes: bytes) -> str:
         """
-        Use Gemini Vision to generate a description of an image
-        
-        Args:
-            image_bytes: Raw image data
-            
-        Returns:
-            Text description of the image
+        Use vision LLM to generate a description of an image.
+        Returns a fallback string if vision is not enabled or fails.
         """
+        if not self.vision_enabled:
+            return "[Image - vision analysis not available]"
+
         try:
-            # Encode image to base64
             b64_image = base64.b64encode(image_bytes).decode('utf-8')
-            
-            # Create message with image
+
+            # Correct OpenAI image_url format: must be an object with a 'url' key
             message = HumanMessage(
                 content=[
                     {
@@ -65,21 +86,21 @@ class DocumentProcessor:
                     },
                     {
                         "type": "image_url",
-                        "image_url": f"data:image/jpeg;base64,{b64_image}"
+                        "image_url": {
+                            "url": f"data:image/jpeg;base64,{b64_image}"
+                        }
                     },
                 ]
             )
-            
-            # Get description from vision model
+
             response = self.vision_llm.invoke([message])
             description = response.content if response.content else "Could not describe image."
-            
             print(f"  [OK] Generated image description ({len(description)} chars)")
             return description
-            
+
         except Exception as e:
-            print(f"  [ERROR] Error generating image description: {e}")
-            return "Image description unavailable due to processing error."
+            print(f"  [SKIP] Image description skipped: {e}")
+            return "[Image - description unavailable]"
     
     def _extract_text_from_page(self, page, page_num: int) -> List[Document]:
         """

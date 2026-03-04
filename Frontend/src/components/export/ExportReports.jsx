@@ -8,7 +8,7 @@ import 'jspdf-autotable';
 import { FileDown, FileText } from 'lucide-react';
 
 const ExportReports = ({ messages, conversationTitle }) => {
-  
+
   const exportToPDF = () => {
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.getWidth();
@@ -50,7 +50,7 @@ const ExportReports = ({ messages, conversationTitle }) => {
       doc.setFontSize(10);
       doc.setTextColor(50, 50, 50);
       const lines = doc.splitTextToSize(msg.content, pageWidth - 2 * margin);
-      
+
       lines.forEach((line) => {
         if (yPosition > pageHeight - 30) {
           doc.addPage();
@@ -89,7 +89,7 @@ const ExportReports = ({ messages, conversationTitle }) => {
 
     messages.forEach((msg) => {
       if (msg.role === 'system') return;
-      
+
       const role = msg.role === 'user' ? '👤 **You**' : '🤖 **AI Assistant**';
       markdown += `${role}\n\n`;
       markdown += `${msg.content}\n\n`;
@@ -109,7 +109,7 @@ const ExportReports = ({ messages, conversationTitle }) => {
     <div className="flex items-center gap-1 sm:gap-2">
       <button
         onClick={exportToPDF}
-        className="flex items-center gap-1 sm:gap-2 px-2 py-1.5 sm:px-3 sm:py-2 bg-red-50 hover:bg-red-100 text-red-700 rounded-lg transition-all duration-200 text-xs sm:text-sm font-medium"
+        className="flex items-center gap-1 sm:gap-2 px-2 py-1.5 sm:px-3 sm:py-2 bg-red-50 hover:bg-red-100 text-red-700 rounded-lg text-xs sm:text-sm font-medium transition-colors"
         title="Export as PDF"
       >
         <FileDown className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
@@ -117,7 +117,7 @@ const ExportReports = ({ messages, conversationTitle }) => {
       </button>
       <button
         onClick={exportToMarkdown}
-        className="flex items-center gap-1 sm:gap-2 px-2 py-1.5 sm:px-3 sm:py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg transition-all duration-200 text-xs sm:text-sm font-medium"
+        className="flex items-center gap-1 sm:gap-2 px-2 py-1.5 sm:px-3 sm:py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg text-xs sm:text-sm font-medium transition-colors"
         title="Export as Markdown"
       >
         <FileText className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
